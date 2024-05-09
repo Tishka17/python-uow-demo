@@ -1,9 +1,9 @@
-from gw import UserGw
+from gw import UserGateway
 from models import User
-from uowed import UoW
+from uowed import UnitOfWork
 
 
-def interactor(uow: UoW, gw: UserGw) -> None:
+def interactor(uow: UnitOfWork, gw: UserGateway) -> None:
     user = gw.get_user(1)
     user.name = "Tishka17"
 
@@ -16,8 +16,8 @@ def interactor(uow: UoW, gw: UserGw) -> None:
 
 
 def main():
-    uow = UoW()
-    gw = UserGw(uow)
+    uow = UnitOfWork()
+    gw = UserGateway(uow)
     interactor(uow, gw)
 
 

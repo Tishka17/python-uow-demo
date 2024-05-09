@@ -1,16 +1,10 @@
+from typing import cast
+
 from models import User
-from uowed import UowedGw, UoW, UowedModel
+from uowed import UoWGateway, UnitOfWork, UoWModel
 
 
-class UserGw(UowedGw):
-    def __init__(self, uow: UoW):
-        self.uow = uow
-        uow.repos[User] = self
-
-    def get_user(self, id) -> User:
-        user = User(id, f"Name {id}")
-        return UowedModel(user, self.uow)
-
+class UserUowGateway(UoWGateway):
     def insert(self, model):
         print(f"insert {model}")
 
@@ -19,3 +13,13 @@ class UserGw(UowedGw):
 
     def update(self, model):
         print(f"update {model}")
+
+
+class UserGateway(UoWGateway):
+    def __init__(self, uow: UnitOfWork):
+        self.uow = uow
+        uow.repos[User] = UserUowGateway()
+
+    def get_user(self, id) -> User:
+        user = User(id, f"Name {id}")
+        return cast(User, UoWModel(user, self.uow))

@@ -1,4 +1,7 @@
-class UowedGw:
+from typing import Protocol
+
+
+class UoWGateway(Protocol):
     def insert(self, model):
         raise NotImplementedError
 
@@ -9,7 +12,7 @@ class UowedGw:
         raise NotImplementedError
 
 
-class UoW:
+class UnitOfWork:
     def __init__(self):
         self.dirty = {}
         self.new = {}
@@ -23,7 +26,7 @@ class UoW:
         self.dirty[model_id] = model
 
     def register_deleted(self, model):
-        if isinstance(model, UowedModel):
+        if isinstance(model, UoWModel):
             model = model._model
 
         model_id = id(model)
@@ -37,7 +40,7 @@ class UoW:
     def register_new(self, model):
         model_id = id(model)
         self.new[model_id] = model
-        return UowedModel(model, self)
+        return UoWModel(model, self)
 
     def commit(self):
         for model in self.new.values():
@@ -48,7 +51,7 @@ class UoW:
             self.repos[type(model)].delete(model)
 
 
-class UowedModel:
+class UoWModel:
     def __init__(self, model, uow):
         self.__dict__["_model"] = model
         self.__dict__["_uow"] = uow
