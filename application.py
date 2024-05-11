@@ -1,4 +1,4 @@
-from gw import UserGateway
+from gateway import UserGateway
 from models import User
 from uowed import UnitOfWork
 

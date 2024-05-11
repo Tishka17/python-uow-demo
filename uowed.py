@@ -1,14 +1,17 @@
-from typing import Protocol
+from typing import Protocol, TypeVar
+
+ModelT = TypeVar('ModelT')
 
 
-class UoWGateway(Protocol):
-    def insert(self, model):
+class DataMapper(Protocol[ModelT]):
+    """Class used by a UoW to flush changes to a database"""
+    def insert(self, model: ModelT):
         raise NotImplementedError
 
-    def delete(self, model):
+    def delete(self, model: ModelT):
         raise NotImplementedError
 
-    def update(self, model):
+    def update(self, model: ModelT):
         raise NotImplementedError
 
 
@@ -17,7 +20,7 @@ class UnitOfWork:
         self.dirty = {}
         self.new = {}
         self.deleted = {}
-        self.repos = {}
+        self.mappers = {}
 
     def register_dirty(self, model):
         model_id = id(model)
@@ -43,15 +46,22 @@ class UnitOfWork:
         return UoWModel(model, self)
 
     def commit(self):
+        # here we can add optimizations like request batching
+        # but it will also require extending of Mapper protocol
         for model in self.new.values():
-            self.repos[type(model)].insert(model)
+            self.mappers[type(model)].insert(model)
         for model in self.dirty.values():
-            self.repos[type(model)].update(model)
+            self.mappers[type(model)].update(model)
         for model in self.deleted.values():
-            self.repos[type(model)].delete(model)
+            self.mappers[type(model)].delete(model)
 
 
 class UoWModel:
+    """
+    Model wrapper which allows to implicitly mark model
+    as modified on attribute assignment.
+    """
+
     def __init__(self, model, uow):
         self.__dict__["_model"] = model
         self.__dict__["_uow"] = uow
