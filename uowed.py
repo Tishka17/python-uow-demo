@@ -102,7 +102,7 @@ class UoWAttributeProxy:
 class UoWModel:
     def __init__(self, model, uow):
         for key, value in model.__dict__.items():
-            if not getattr(value, "_uow_wrapped", False):
+            if not isinstance(value, UoWAttributeProxy):
                 setattr(model, key, UoWAttributeProxy(value, uow, model))
 
         self.__dict__["_model"] = model
