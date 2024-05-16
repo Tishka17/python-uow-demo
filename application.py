@@ -10,6 +10,8 @@ def interactor(uow: UnitOfWork, gw: UserGateway) -> None:
     user2 = uow.register_new(User(2, "User2"))
     user2.name = "Mock User"
 
+    user.posts.append("it is works!")
+
     user3 = gw.get_user(3)
     uow.register_deleted(user3)
     uow.commit()
@@ -21,5 +23,5 @@ def main():
     interactor(uow, gw)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
